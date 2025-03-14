@@ -1,7 +1,9 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from langchain_core.messages import SystemMessage, HumanMessage
+from django.views.decorators.csrf import csrf_exempt
 from .controller import chain
+import json
 
 messages = [
     SystemMessage("You are an anget responsible for answer questions"),
@@ -19,16 +21,24 @@ def stream_model(user_input: str):
     }
 #testing
 
-def chat(request, prompt):
-
+@csrf_exempt
+def chat(request):
     try:
-        return JsonResponse(stream_model(prompt))
-    except:
-        # fallback if input() is not available
-        user_input = "What do you know about LangGraph?"
-        # print("User: " + user_input)
+        # load the json body
+        data = json.loads(request.body)  # Parse the body to a python dictionary
+        print(data['body'])
+        try:
+            return JsonResponse(stream_model(data['body'])) # consult the whatsappwebapi.js file to know the data attributes
+        except:
+            # fallback if input() is not available
+            user_input = "What do you know about LangGraph?"
+            # print("User: " + user_input)
 
-        return JsonResponse(stream_model(prompt))
+            return JsonResponse(stream_model(data['body']))
+    except json.JSONDecodeError:
+        return JsonResponse({'erro': 'JSON inválido'}, status=400)
+
+
 
 def test(request):
     data = {"message": "Hello, World!", "status": "success"}

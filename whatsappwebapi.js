@@ -3,8 +3,6 @@ const qrcode = require('qrcode');
 
 const client = new Client();
 
-
-
 client.on('qr', (qr) => {
     // Generate and scan this code with your phone
     console.log('QR RECEIVED', qr);
@@ -22,12 +20,36 @@ client.on('ready', () => {
 });
 
 client.on('message', msg => {
-    fetch('http://127.0.0.1:8000/chat/'+msg.body)
-        .then(response => response.json())  // Converte a resposta para JSON
-        .then(data => {
-            msg.reply(data.message); // Exibe o valor da chave 'message'
-        })
-        .catch(error => console.log('Erro:', error));
+  data = {
+    id: msg.id._serialized, // id for this message
+    from: msg.from, // the sender id
+    to: msg.to, // the recipient id
+    timestamp: msg.timestamp, // the time for the message
+    body: msg.body, // the content
+    hasMedia: msg.hasMedia, // a boolen if there media
+    isForwarded: msg.isForwarded, // a boolen that means if the message is forwarded
+    isStarred: msg.isStarred, // if there a star in message
+    fromMe: msg.fromMe, // boolen for to differentiate me and the bot
+    type: msg.type, // the media type (text, video, image...)
+    chat: msg.chat, // an object about the local where the message originated
+    author: msg.author, // the author, its relevant for groups
+    deviceType: msg.deviceType, // the device type (web, ios...)
+    mentionedIds: msg.mentionedIds, // the list of mentions 
+  };
+
+  url = 'http://127.0.0.1:8000/chat'
+  fetch(url, {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+  })
+  .then(response => response.json())
+  .then(data => {
+    msg.reply(data.message); // Exibe o valor da chave 'message'
+  })
+  .catch(error => console.log('Erro:', error));
 });
 
 client.initialize();
