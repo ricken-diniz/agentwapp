@@ -38,18 +38,20 @@ client.on('message', msg => {
   };
 
   url = 'http://127.0.0.1:8000/chat'
-  fetch(url, {
+  if (/^\d{10,15}@c\.us$/.test(data['from'])) {
+    fetch(url, {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json'
       },
       body: JSON.stringify(data)
-  })
-  .then(response => response.json())
-  .then(data => {
-    msg.reply(data.message); // Exibe o valor da chave 'message'
-  })
-  .catch(error => console.log('Erro:', error));
+    })
+    .then(response => response.json())
+    .then(data => {
+      msg.reply(data.message); // Exibe o valor da chave 'message'
+    })
+    .catch(error => console.log('Erro:', error));
+  }
 });
 
 client.initialize();
