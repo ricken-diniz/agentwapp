@@ -14,3 +14,4 @@ embedding_fn = model.DefaultEmbeddingFunction()
 client = MilvusClient("milvus_demo.db") # Client for a local database, this can be made with cluster
 
 def run_query(content: dict, **kwargs: str):
+    print(content)
