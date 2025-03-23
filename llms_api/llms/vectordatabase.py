@@ -8,9 +8,13 @@
 '''
 
 from pymilvus import MilvusClient, DataType, Function, FunctionType
-from pymilvus import model
 
-embedding_fn = model.DefaultEmbeddingFunction()
+from sentence_transformers import SentenceTransformer
+modelo = SentenceTransformer('all-MiniLM-L6-v2')
+
+# from pymilvus import model
+
+# embedding_fn = model.DefaultEmbeddingFunction()
 client = MilvusClient("milvus_demo.db") # Client for a local database, this can be made with cluster
 
 
@@ -39,6 +43,22 @@ bm25_function = Function(
     function_type=FunctionType.BM25  # Definir como BM25
 )
 
+def dense_embedding_document(docs: dict):
+    # Lista de docs
+    docs = [
+        "O cachorro está brincando no parque.",
+        "A lua brilha à noite.",
+        "O gato dorme no sofá.",
+        "Hoje o tempo está ensolarado.",
+        "Pizza de calabresa custa 10 dólares.",
+        "Pizza de carne, de frango e de quatro queijos."
+    ]
+
+    # Gerar embeddings para todas as docs
+    embeddings = modelo.encode(docs, convert_to_tensor=True)
+    return embeddings
+
+
 schema = MilvusClient.create_schema(
     auto_id=False,
     enable_dynamic_field=True,
@@ -57,5 +77,3 @@ if not client.has_collection(collection_name="hybrid_search_collection"):
         index_params=index_params
     )
 
-def run_query(content: dict, **kwargs: str):
-    print(content)
