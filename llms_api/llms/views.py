@@ -4,7 +4,7 @@ from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from django.views.decorators.csrf import csrf_exempt
 from .controller import chain
 # from .vectordatabase import run_query
-from dbchroma import db
+from .dbchroma import db
 import json
 
 chanels = {

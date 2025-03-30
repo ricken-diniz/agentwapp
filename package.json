@@ -1,5 +1,8 @@
 {
   "dependencies": {
+    "chromium": "^3.0.3",
+    "puppeteer": "^24.4.0",
+    "puppeteer-core": "^24.4.0",
     "qrcode": "^1.5.4",
     "whatsapp-web.js": "^1.27.0"
   }

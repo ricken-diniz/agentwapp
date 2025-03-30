@@ -1,7 +1,13 @@
 const { Client } = require('whatsapp-web.js');
 const qrcode = require('qrcode');
 
-const client = new Client();
+const client = new Client({
+  puppeteer: {
+      executablePath: '/usr/bin/chromium-browser',
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+  }
+});
 
 client.on('qr', (qr) => {
     // Generate and scan this code with your phone
