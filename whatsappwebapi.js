@@ -42,7 +42,6 @@ client.on('message', msg => {
     deviceType: msg.deviceType, // the device type (web, ios...)
     mentionedIds: msg.mentionedIds, // the list of mentions 
   };
-
   url = 'http://127.0.0.1:8000/chat'
   if (/^\d{10,15}@c\.us$/.test(data['from'])) {
     fetch(url, {

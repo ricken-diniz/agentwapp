@@ -6,9 +6,13 @@ from .controller import chain
 # from .vectordatabase import run_query
 from .dbchroma import db
 import json
+import time
 
 chanels = {
 }
+user_input_dict = {
+}
+last_execution_time = 0
 
 def stream_model(user_input: json):
     if user_input['from'] in chanels:
@@ -36,20 +40,25 @@ def stream_model(user_input: json):
 
 @csrf_exempt
 def chat(request):
-    try:
-        # load the json body
-        data = json.loads(request.body)  # Parse the body to a python dictionary
-        print(data['body'])
+    global user_input_dict
+    global last_execution_time
+    now = time.time()
+    # load the json body
+    if request:
+        user_input_dict.append(json.loads(request.body))# Parse the body to a python dictionary
+    
+    if now - last_execution_time >= 3:
+        data = user_input_dict
+        last_execution_time = now
+        user_input_dict = {}
         try:
             return JsonResponse(stream_model(data)) # consult the whatsappwebapi.js response to know the data attributes
-        except:
-            # fallback if input() is not available
-            user_input = "What do you know about LangGraph?"
-            # print("User: " + user_input)
-
-            return JsonResponse(stream_model(data))
-    except json.JSONDecodeError:
-        return JsonResponse({'erro': 'JSON inválido'}, status=400)
+        except json.JSONDecodeError:
+            return JsonResponse({'erro': 'JSON inválido'}, status=400)
+    else:
+        sleep(3)
+        chat()
+        
 
 
 # Create your views here.
