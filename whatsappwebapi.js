@@ -1,28 +1,28 @@
 const { Client } = require('whatsapp-web.js');
-const qrcode = require('qrcode');
+  const qrcode = require('qrcode');
 
 const client = new Client({
   puppeteer: {
-      executablePath: '/usr/bin/chromium-browser',
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    executablePath: '/usr/bin/chromium-browser',
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
   }
 });
 
 client.on('qr', (qr) => {
-    // Generate and scan this code with your phone
-    console.log('QR RECEIVED', qr);
-    qrcode.toFile('qrcode.png', qr, { width: 300 }, (err) => {
-      if (err) {
-        console.error('Error generating QR code:', err);
-      } else {
-        console.log('QR code saved as qrcode.png');
-      }
-    });
+  // Generate and scan this code with your phone
+  console.log('QR RECEIVED', qr);
+  qrcode.toFile('qrcode.png', qr, { width: 300 }, (err) => {
+    if (err) {
+      console.error('Error generating QR code:', err);
+    } else {
+      console.log('QR code saved as qrcode.png');
+    }
+  });
 });
 
 client.on('ready', () => {
-    console.log('Client is ready!');
+  console.log('Client is ready!');
 });
 
 client.on('message', msg => {
@@ -47,15 +47,15 @@ client.on('message', msg => {
     fetch(url, {
       method: 'POST',
       headers: {
-          'Content-Type': 'application/json'
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(data)
     })
-    .then(response => response.json())
-    .then(data => {
-      msg.reply(data.message); // Exibe o valor da chave 'message'
-    })
-    .catch(error => console.log('Erro:', error));
+      .then(response => response.json())
+      .then(data => {
+        msg.reply(data.message); // Exibe o valor da chave 'message'
+      })
+      .catch(error => console.log('Erro:', error));
   }
 });
 
