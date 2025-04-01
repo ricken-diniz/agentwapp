@@ -1,47 +1,55 @@
 dict_master = {
-    'user_one' : {
-        'id' : data_first['id'],
+    'id1' : {
+        'checker' : true,
         'last_time' : time(),
         'data_one' : [],
         'data_two' : [],
     },
-    'user_two' : {
-        'id' : data_first['id'],
+    'id2' : {
+        'checker' : true,
         'last_time' : time(),
         'data_one' : [],
     },
 }
 
-checker = true
-new_data = []
+// checker = true
+new_data = {
+    'from' : 'idx'
+}
 url = 'http://127.0.0.1:8000/chat'
 
-for(i = 0;i < dict_master.length();i++){
-    if (new_data['id'] == dict_master[i].id ){
-        if( verify_last_message_time(dict_master[i].last_time) <= 3){
-            dict_master[i]['data'+str(i)] = new_data
-            checker = false
-        } else {
-            send_message(dict_master)
-        }
-    } else {
-        user = {}
-        user['id'] = new_data['id']
-        user['last_time'] = time()
-        user['data'+str(i)] = new_data
-        dict_master['user' + str(i)] = user
-        send_message(dict_master)
-    }
-};
+if(new_data['from'] in dict_master){
+    user = dict_master[new_data['from']]
+    if(verify_last_message_time(user['last_time']) <= 3){
+        user['data'+time()] = new_data
+        user['checker'] = false
+    } 
+    send_message(new_data['from'])
+} else { // user never been defined
+    data = str('data' + time())
+    dict_master[new_data['from']] = {
+        'checker': false,
+        'last_time': time(),
+        data : new_data
+    };
+    send_message(new_data['from'])
+}
 
 function verify_last_message_time(timestamp){
     return time() - timestamp;
 }
 
 async function send_message(content){
-    sleep(3)
-    if (checker == true){
-
+    if (dict_master[content]['checker'] == true){
+        // send message to url
+        for(let element in dict_master){
+            if(element == content){
+                dict_master[element] = {} // reset the user temporary messages
+            }
+        }
+    } else {
+        sleep(3)
+        dict_master[content]['checker'] = true
+        send_message(content)
     }
-    dict_master = {}
 }
