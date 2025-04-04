@@ -71,7 +71,7 @@ client.on('message', msg => {
         msg.reply(data.message); // Exibe o valor da chave 'message'
       })
       .catch(error => console.log('Erro:', error));
-  }
+  } // this fetch is to better in the timecontroller.js file
 });
 
 

@@ -1,5 +1,7 @@
+
+// Imaginary datas
+const dict_master = {}
 export class TimeController {
-    
     // auxiliaries functions
     sleep(seconds) {
         seconds = seconds * 1000
@@ -32,7 +34,12 @@ export class TimeController {
                 console.log('mensagem ' + number + ' enviada!') //its just a log checker, remove later
                 for (let element in dict_master) {
                     if (element == identify) {
+                        let response = dict_master[element]
+                        console.log(dict_master)
+                        console.log(response)
                         dict_master[element] = {} // reset the user temporary messages
+                        console.log(response)
+                        return response
                     }
                 }
             } else {
@@ -59,3 +66,10 @@ export class TimeController {
         this.send_message(new_data['from'])
     }
 }
+
+
+
+/** Final Remarks 4/2/25
+ - A variável de checagem não é necessária, uma vez que tal funcionalidade pode ser feita a partir das horas registradas
+ - É necessário verificar o motivo da função "send_message" estar sendo executada inúmeras vezes, provavelmente por falha de lógica no verificador da linha 67.
+ */

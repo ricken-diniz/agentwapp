@@ -1,28 +1,22 @@
-dict_master = {
-    'id1' : {
-        'checker' : true,
-        'last_time' : 'time()',
-        'data_one' : [],
-        'data_two' : [],
-    },
-    'id2' : {
-        'checker' : true,
-        'last_time' : 'time()',
-        'data_one' : [],
-    },
+
+import { TimeController } from './teste.js';
+const tc = new TimeController
+
+const imaginary_data = {
+    'from': 'idx'
 }
-dict2 = {
-    'id1' : {
-        'checker' : true,
-        'last_time' : 'time()',
-        'data_one' : [],
-        'data_two' : [],
-    }
+
+async function testing(){
+    let a = tc.newData(imaginary_data) // msg 1
+    console.log(a)
+    await tc.sleep(1)
+    let b = tc.newData(imaginary_data) // msg 2
+    console.log(b)
+    await tc.sleep(1)
+    let c = tc.newData(imaginary_data) // msg 3 (sent)
+    console.log(c)
+    await tc.sleep(3.5)
+    let d = tc.newData(imaginary_data) // msg 1 (sent)
+    console.log(d)
 }
-x = dict_master['id1']
-y = dict2['id1']
-if(x == y){
-    console.log('yes!')
-} else {
-    console.log('no!')
-}
+testing()
