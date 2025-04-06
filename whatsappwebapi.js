@@ -1,9 +1,8 @@
-const { Client } = require('whatsapp-web.js');
-const qrcode = require('qrcode');
-const url = 'http://127.0.0.1:8000/chat';
-const time_drop = 2
-dict_master = {}
-
+import { Client } from 'whatsapp-web.js';
+import qrcode from 'qrcode';
+// Time Controller
+import { TimeController } from './timecontroller.js';
+const tc = new TimeController
 
 // Configuration
 const client = new Client({
@@ -31,14 +30,10 @@ client.on('ready', () => {
 });
 
 
-// Time Controller
-import { TimeController } from './timecontroller';
-const tc = new TimeController
 
 
 // Messages Controller
 client.on('message', msg => {
-
 
 
   data = {
@@ -57,20 +52,11 @@ client.on('message', msg => {
     deviceType: msg.deviceType, // the device type (web, ios...)
     mentionedIds: msg.mentionedIds, // the list of mentions 
   };
+
+  console.log('xxx')
   if (/^\d{10,15}@c\.us$/.test(data['from'])) {
-  if(tc.newData(data)) // ..... fix this, need review the logic of async methods in this case
-    fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    })
-      .then(response => response.json())
-      .then(data => {
-        msg.reply(data.message); // Exibe o valor da chave 'message'
-      })
-      .catch(error => console.log('Erro:', error));
+    tc.newData(data) // ..... fix this, need review the logic of async methods in this case
+      
   } // this fetch is to better in the timecontroller.js file
 });
 

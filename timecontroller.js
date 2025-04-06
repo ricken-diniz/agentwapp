@@ -1,6 +1,6 @@
 export class TimeController {
-    
     // auxiliaries functions
+    time_drop = 3
     sleep(seconds) {
         seconds = seconds * 1000
         return new Promise(resolve => setTimeout(resolve, seconds));
@@ -25,19 +25,32 @@ export class TimeController {
     
     // Primary methods
     async send_message(identify) {
+        const url = require('./config.json').python_api_url
         let number = this.get_last_data_identifier(identify)
         if (dict_master[identify]['data' + (number)]) {
-            if (this.verify_last_message_time(dict_master[identify]['data' + (number)]['last_time']) >= 3) {
+            if (this.verify_last_message_time(dict_master[identify]['data' + (number)]['last_time']) >= time_drop) {
                 // send message to url
-                console.log('mensagem ' + number + ' enviada!') //its just a log checker, remove later
                 for (let element in dict_master) {
                     if (element == identify) {
+                        fetch(url, {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(dict_master[element])
+                          })
+                            .then(response => response.json())
+                            .then(data => {
+                              msg.reply(data.message); // Exibe o valor da chave 'message' !!CAUNTION!! 'msg' is not defined in this context
+                            })
+                            .catch(error => console.log('Erro:', error));
+                        console.log('mensagem ' + number + ' enviada!') //its just a log checker, remove later
                         dict_master[element] = {} // reset the user temporary messages
                     }
                 }
             } else {
                 console.log(number + ': aguarde 3 segundos...')
-                await this.sleep(3)
+                await this.sleep(time_drop)
                 let number2 = this.get_last_data_identifier(identify)
                 if (dict_master[identify]['data' + (number)] == dict_master[identify]['data' + (number2)]) {
                     this.send_message(identify)
