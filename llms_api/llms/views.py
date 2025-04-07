@@ -10,26 +10,32 @@ import time
 
 chanels = {
 }
-user_input_dict = {
-}
-last_execution_time = 0
 
 def stream_model(user_input: json):
-    if user_input['from'] in chanels:
-        messages = chanels[user_input['from']]
-    else:
-        messages = [
-            SystemMessage('Você é um Agente de Inteligência Artificial que deverá responder perguntas, de forma breve (até 2 linhas), de acordo com um contexto'),
-            SystemMessage("Você é um agente responsável por responder mensagens de uma plataforma de mensages, haverá diferentes conversas e o sistema será responsável por passar os indentificadores de cada uma, para que cada uma possua apenas o contexto e histórico de sua própria conversa. Seu idioma nativo é o Português do Brasil."),
-        ]
-    prompt = user_input['body']
+    user = ''
+    for element in user_input:
+        if element in chanels:
+            user = user_input[element]['from']
+            messages = chanels[user_input[element]['from']]
+        else:
+            messages = [
+                SystemMessage('Você é um Agente de Inteligência Artificial que deverá responder perguntas, de forma breve (até 2 linhas), de acordo com um contexto'),
+                SystemMessage("Você é um agente responsável por responder mensagens de uma plataforma de mensages, haverá diferentes conversas e o sistema será responsável por passar os indentificadores de cada uma, para que cada uma possua apenas o contexto e histórico de sua própria conversa. Seu idioma nativo é o Português do Brasil."),
+                (SystemMessage('O próximo prompt é uma mensagem de '+user_input[element]['from']+' trate como contexto apenas as mensagens de mesma origem'))
+            ]
+        break
+    i = 0
+    prompt = ""
+    for element in user_input:
+        i+=1
+        prompt = prompt + "Mensagem "+str(i)+":\n"+ user_input[element]['body']+"\n\n"
+        
     search = db.similarity_search(prompt, k=1)
     res_vectordb = search[0].page_content
-    messages.append(SystemMessage('O próximo prompt é uma mensagem de '+user_input['from']+' trate como contexto apenas as mensagens de mesma origem'))
-    messages.append(SystemMessage('Contexto: '+ res_vectordb))
-    messages.append(HumanMessage(content=prompt,chanel=user_input['from']))
+    messages.append(SystemMessage('Contexto das mensagens: '+ res_vectordb))
+    messages.append(HumanMessage(content=prompt,chanel=user))
     
-    chanels[user_input['from']] = messages
+    chanels[user] = messages
 
     res = chain.invoke(messages)
     messages.append(AIMessage(res.content))
@@ -40,24 +46,15 @@ def stream_model(user_input: json):
 
 @csrf_exempt
 def chat(request):
-    global user_input_dict
-    global last_execution_time
-    now = time.time()
     # load the json body
     if request:
-        user_input_dict.append(json.loads(request.body))# Parse the body to a python dictionary
-    
-    if now - last_execution_time >= 3:
-        data = user_input_dict
-        last_execution_time = now
-        user_input_dict = {}
+        data = (json.loads(request.body))# Parse the body to a python dictionary
+        print(data)
         try:
             return JsonResponse(stream_model(data)) # consult the whatsappwebapi.js response to know the data attributes
         except json.JSONDecodeError:
             return JsonResponse({'erro': 'JSON inválido'}, status=400)
-    else:
-        sleep(3)
-        chat()
+   
         
 
 

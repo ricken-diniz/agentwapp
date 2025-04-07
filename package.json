@@ -7,5 +7,9 @@
     "whatsapp-web.js": "^1.27.0",
     "require":"2.4.20"
   },
+  "main": "whatsappwebapi.js",
+  "scripts": {
+    "start": "node whatsappwebapi.js"
+  },
   "type" : "module"
 }

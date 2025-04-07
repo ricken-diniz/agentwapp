@@ -1,14 +1,21 @@
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+
 import { Client } from 'whatsapp-web.js';
+const { LocalAuth } = require('whatsapp-web.js');
+const fs = require('fs');
+const url = require('./config.json').python_api_url
+const controller = createChatCollector();
 import qrcode from 'qrcode';
-// Time Controller
-import { TimeController } from './timecontroller.js';
-const tc = new TimeController
+
 
 // Configuration
 const client = new Client({
+  authStrategy: new LocalAuth(),
   puppeteer: {
     executablePath: '/usr/bin/chromium-browser',
     headless: true,
+    timeout: 60000,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   }
 });
@@ -29,14 +36,11 @@ client.on('ready', () => {
   console.log('Client is ready!');
 });
 
-
-
-
 // Messages Controller
-client.on('message', msg => {
+import { createChatCollector } from './timecontroller.js';
+client.on('message', async (msg) => {
 
-
-  data = {
+  let data = {
     id: msg.id._serialized, // id for this message
     from: msg.from, // the sender id
     to: msg.to, // the recipient id
@@ -53,13 +57,40 @@ client.on('message', msg => {
     mentionedIds: msg.mentionedIds, // the list of mentions 
   };
 
-  console.log('xxx')
+  // console.log(data);
   if (/^\d{10,15}@c\.us$/.test(data['from'])) {
-    tc.newData(data) // ..... fix this, need review the logic of async methods in this case
-      
-  } // this fetch is to better in the timecontroller.js file
+    controller.addMessage(data);
+    controller.promise.then(result => {
+
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(result['chatMessages'])
+      })
+        .then(response => response.json())
+        //   if(response.status !== 200) {
+        //     console.error('Error:', response.statusText);
+        //   }else{
+        //     console.log('Status Code:', response.status);
+        //     response.json()
+        //   }
+        // })
+        .then(data => {
+          console.log(data) // Exibe o valor da chave 'message'
+          msg.reply(data.message); // Exibe o valor da chave 'message' 
+        })
+        .catch(error => console.log('Erro:', error));
+    
+      // end promise
+    });
+    //end if
+  };
+
+  // end client event
 });
 
-
-
 client.initialize();
+
+

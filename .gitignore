@@ -3,3 +3,6 @@
 node_modules/
 
 qrcode.png
+
+.wwebjs_auth
+.wwebjs_cache
