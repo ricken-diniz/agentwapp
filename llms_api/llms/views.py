@@ -48,6 +48,7 @@ def stream_model(user_input: json):
 def chat(request):
     # load the json body
     if request:
+        print(request.body)
         data = (json.loads(request.body))# Parse the body to a python dictionary
         print(data)
         try:

@@ -5,7 +5,6 @@ import { Client } from 'whatsapp-web.js';
 const { LocalAuth } = require('whatsapp-web.js');
 const fs = require('fs');
 const url = require('./config.json').python_api_url
-const controller = createChatCollector();
 import qrcode from 'qrcode';
 
 
@@ -36,8 +35,63 @@ client.on('ready', () => {
   console.log('Client is ready!');
 });
 
+
+
+
+
+function createChatCollector() {
+  let chatMessages = {};
+  let timerId = null;
+  let resolvePromise;
+
+  const promise = new Promise((resolve) => {
+    resolvePromise = resolve;
+  });
+
+  function addMessage(message) {
+    chatMessages[message['from']] = message;
+    if (timerId) {
+      clearTimeout(timerId);
+    }
+
+    timerId = setTimeout(() => {
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(chatMessages)
+      })
+        .then(response => response.json())
+        //   if(response.status !== 200) {
+        //     console.error('Error:', response.statusText);
+        //   }else{
+        //     console.log('Status Code:', response.status);
+        //     response.json()
+        //   }
+        // })
+        .then(async data => {
+          // console.log(data) // Exibe o valor da chave 'message'
+          // resolvePromise({ data });
+          await client.sendMessage(message['from'], data).then(() => {
+            console.log('Mensagem enviada com sucesso!');
+          }).catch((err) => {
+            console.error('Erro ao enviar mensagem:', err);
+          });
+        })
+        .catch(error => console.log('Erro:', error));
+      chatMessages = {};
+    }, 3000);
+  }
+  return { addMessage, promise };
+}
+const controller = createChatCollector();
+
+
+
+
+
 // Messages Controller
-import { createChatCollector } from './timecontroller.js';
 client.on('message', async (msg) => {
 
   let data = {
@@ -60,31 +114,10 @@ client.on('message', async (msg) => {
   // console.log(data);
   if (/^\d{10,15}@c\.us$/.test(data['from'])) {
     controller.addMessage(data);
-    controller.promise.then(result => {
-
-      fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(result['chatMessages'])
-      })
-        .then(response => response.json())
-        //   if(response.status !== 200) {
-        //     console.error('Error:', response.statusText);
-        //   }else{
-        //     console.log('Status Code:', response.status);
-        //     response.json()
-        //   }
-        // })
-        .then(data => {
-          console.log(data) // Exibe o valor da chave 'message'
-          msg.reply(data.message); // Exibe o valor da chave 'message' 
-        })
-        .catch(error => console.log('Erro:', error));
-    
-      // end promise
-    });
+    // controller.promise.then(result => {
+    //   msg.reply(result); // Exibe o valor da chave 'message' 
+    //   // end promise
+    // });
     //end if
   };
 
